@@ -1,18 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { getProducts, Product } from "../../app/api";
+import { getProducts } from "../../app/api";
+import { useAppSelector, useAppDispatch } from "../../app/hook";
+import { receivedProducts } from "./productSlice";
 import styles from "./Products.module.css";
+import { addToCart } from "../cart/cartSlice";
 
 export function Products() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const dispatch = useAppDispatch();
+
   useEffect(() => {
     getProducts().then((products) => {
-      setProducts(products);
+      dispatch(receivedProducts(products));
     });
   }, []);
+
+  const products = useAppSelector((state) => state.product.products);
+
   return (
     <main className="page">
       <ul className={styles.products}>
-        {products.map((product) => (
+        {Object.values(products).map((product) => (
           <li key={product.id}>
             <article className={styles.product}>
               <figure>
@@ -25,7 +32,9 @@ export function Products() {
                 <h1>{product.name}</h1>
                 <p>{product.description}</p>
                 <p>${product.price}</p>
-                <button>Add to Cart 🛒</button>
+                <button onClick={() => dispatch(addToCart(product.id))}>
+                  Add to Cart 🛒
+                </button>
               </div>
             </article>
           </li>
